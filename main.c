@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <raylib.h>
 #include <unistd.h>
 
@@ -137,6 +138,17 @@ void Ones(Vector2 cellNumber, int gridCells[][(int)cellNumber.y]) {
 	gridCells[9][5] = 1;
 	gridCells[8][4] = 1;
 }
+
+void randomCells(int number,Vector2 cellNumber, int gridCells[][(int)cellNumber.y]) {
+
+	for (int i=0;i<number;i++) {
+		int randx = rand() % ((int)cellNumber.x + 1);
+		int randy = rand() % ((int)cellNumber.y + 1);
+		gridCells[randx][randy] = 1;
+
+	}
+
+}
 void printCell(Vector2 cellNumber, int gridCells[][(int)cellNumber.y]) {
 	printf("\n\n");
 	Vector2 cellInQuestion;
@@ -166,8 +178,8 @@ int main() {
 	gridCellsInit(cellNumber, gridCells); // Initialize with all dead cells
 	Vector2 pos = {0,0};
 	Vector2 size = {10,10};
-	Ones(cellNumber, gridCells);
-
+	//Ones(cellNumber, gridCells);
+        randomCells(14000,cellNumber,gridCells);
 
 	InitWindow(width, height, title);
         while (!WindowShouldClose()) {
