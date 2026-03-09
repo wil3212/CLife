@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <raylib.h>
 #include <unistd.h>
+#include <time.h>
 
 void gridInit(int cellSize, Vector2 cellNumber, Vector2 gridToInitialize[(int)cellNumber.x][(int)cellNumber.y]) {                    // Function will assing the right xreen coord for each cell
 	for (int i=0;i<cellNumber.x;i++) {
@@ -26,7 +27,7 @@ void drawGrid(int cellSize,Vector2 cellNumber, int gridCells[(int)cellNumber.x][
 				DrawRectangleV(gridPoss[i][j],cellSizeV, BLUE);
 			}
 
-			else {
+		        else {
 				DrawRectangleV(gridPoss[i][j],cellSizeV, BLACK);
 			}
 		}
@@ -167,6 +168,8 @@ void printCell(Vector2 cellNumber, int gridCells[][(int)cellNumber.y]) {
 	}
 }
 int main() {
+	clock_t start,end;
+
         Vector2 cellNumber = {500,500};  // Cell grid dimentions, e.g 50,100 would be a 50 by 100 cell grid
 	int cellSize = 1;
 	int width = cellSize*(int)cellNumber.x;
@@ -184,11 +187,14 @@ int main() {
 	InitWindow(width, height, title);
         while (!WindowShouldClose()) {
 	//for (int i=0;i<4;i++) {
+		start = clock();
 	       // printCell(cellNumber, gridCells);
 		BeginDrawing();
 		drawGrid(cellSize,cellNumber,gridCells,grid);
 		EndDrawing();
 		updateGrid(cellNumber,gridCells);
+		end = clock();
+		printf("time %f\n", 1000*((double) (end - start)/CLOCKS_PER_SEC));
 	}
 return 1;
 }
