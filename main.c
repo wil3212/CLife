@@ -4,7 +4,57 @@
 #include <unistd.h>
 #include <time.h>
 
-void gridInit(int cellSize, Vector2 cellNumber, Vector2 gridToInitialize[(int)cellNumber.x][(int)cellNumber.y]) {                    // Function will assing the right xreen coord for each cell
+
+// Matrix of int
+                      // Returns pointer to beggining of array of len..
+int* func1(int len) {
+    int* arr = (int*) malloc(sizeof(int)*len); 
+    if (arr == NULL) printf("failled to alloc mem to arrray");
+    return arr; 
+}
+// Hardcode approach for making a matrix
+int** func2(int rows,int columns) {
+    int** matrix = (int**) malloc(sizeof(int*)*rows);
+    if (matrix == NULL) {
+        printf("failled to alloc mem for matrix");
+        return NULL;
+    }
+    for (int i=0;i<rows;i++) {
+        matrix[i] = func1(columns);
+    }
+    return matrix;
+}
+// Free matrix...
+void freeMatrix(int** matrix,int rows) {
+    for (int i=0;i<rows;i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
+}                     
+
+
+// Matrix of Vector2
+
+                      // Returns pointer to beggining of array of len..
+Vector2* func1V(int len) {
+    Vector2* arr = (Vector2*) malloc(sizeof(Vector2)*len); 
+    if (arr == NULL) printf("failled to alloc mem to arrray");
+    return arr; 
+}
+// Hardcode approach for making a matrix
+Vector2** func2V(int rows,int columns) {
+    Vector2** matrix = (Vector2**) malloc(sizeof(Vector2*)*rows);
+    if (matrix == NULL) {
+        printf("failled to alloc mem for matrix");
+        return NULL;
+    }
+    for (int i=0;i<rows;i++) {
+        matrix[i] = func1V(columns);
+    }
+    return matrix;
+}
+// --------------------------------------------------------------------------------------
+void gridInit(int cellSize, Vector2 cellNumber, Vector2** gridToInitialize) {                    // Function will assing the right xreen coord for each cell
 	for (int i=0;i<cellNumber.x;i++) {
 		for (int j=0;j<cellNumber.y;j++) {
 			gridToInitialize[i][j].x = i*cellSize;
@@ -12,14 +62,14 @@ void gridInit(int cellSize, Vector2 cellNumber, Vector2 gridToInitialize[(int)ce
         	}
 	}
 }
-void gridCellsInit(Vector2 cellNumber,int gridCells[(int)cellNumber.x][(int)cellNumber.y]) {
+void gridCellsInit(Vector2 cellNumber,int** gridCells) {
 	for (int i=0;i<cellNumber.x;i++) {
 		for (int j=0;j<cellNumber.y;j++) {
         		gridCells[i][j] = 0;	
 		}
 	}
 }
-void drawGrid(int cellSize,Vector2 cellNumber, int gridCells[(int)cellNumber.x][(int)cellNumber.y], Vector2 gridPoss[(int)cellNumber.x][(int)cellNumber.y]) {
+void drawGrid(int cellSize,Vector2 cellNumber, int** gridCells, Vector2** gridPoss) {
 	Vector2 cellSizeV = {cellSize,cellSize};
 	for (int i=0;i<cellNumber.x;i++) {
 		for (int j=0;j<cellNumber.y;j++) {
@@ -33,18 +83,13 @@ void drawGrid(int cellSize,Vector2 cellNumber, int gridCells[(int)cellNumber.x][
 		}
 	}
 }
-int countN(Vector2 cellNumber, Vector2 cellInQuestion,int gridCells[][(int)cellNumber.y]) {
+int countN(Vector2 cellNumber, Vector2 cellInQuestion,int** gridCells) {
 	int matrix[3][3];
-	matrix[0][0] = gridCells[(int)cellInQuestion.x - 1][(int)cellInQuestion.y -1];
-	matrix[0][1] = gridCells[(int)cellInQuestion.x - 1][(int)cellInQuestion.y];
-	matrix[0][2] = gridCells[(int)cellInQuestion.x - 1][(int)cellInQuestion.y +1];
-	matrix[1][0] = gridCells[(int)cellInQuestion.x][(int)cellInQuestion.y -1];
-	matrix[1][1] = 0;
-	matrix[1][2] = gridCells[(int)cellInQuestion.x][(int)cellInQuestion.y +1];
-	matrix[2][0] = gridCells[(int)cellInQuestion.x + 1][(int)cellInQuestion.y -1];
-	matrix[2][1] = gridCells[(int)cellInQuestion.x + 1][(int)cellInQuestion.y];
-	matrix[2][2] = gridCells[(int)cellInQuestion.x + 1][(int)cellInQuestion.y +1];
-
+    for (int i=0;i<3;i++) { //initializes with 3, so that later one is easy to tell if it fell in the excession cases
+        for (int j=0;j<3;j++) {
+            matrix[i][j] = 3;
+        }
+    }
 	if (cellInQuestion.x - 1 < 0) {
 		matrix[0][0] = 0;
 		matrix[0][1] = 0;
@@ -65,6 +110,23 @@ int countN(Vector2 cellNumber, Vector2 cellInQuestion,int gridCells[][(int)cellN
 		matrix[1][2] = 0;
 		matrix[2][2] = 0;
 	}
+    if (matrix[0][0] == 3)
+	matrix[0][0] = gridCells[(int)cellInQuestion.x - 1][(int)cellInQuestion.y -1];
+    if (matrix[0][1] == 3)
+	matrix[0][1] = gridCells[(int)cellInQuestion.x - 1][(int)cellInQuestion.y];
+    if (matrix[0][2] == 3)
+	matrix[0][2] = gridCells[(int)cellInQuestion.x - 1][(int)cellInQuestion.y +1];
+    if (matrix[1][0] == 3)
+	matrix[1][0] = gridCells[(int)cellInQuestion.x][(int)cellInQuestion.y -1];
+	matrix[1][1] = 0;
+    if (matrix[1][2] == 3)
+	matrix[1][2] = gridCells[(int)cellInQuestion.x][(int)cellInQuestion.y +1];
+    if (matrix[2][0] == 3)
+	matrix[2][0] = gridCells[(int)cellInQuestion.x + 1][(int)cellInQuestion.y -1];
+    if (matrix[2][1] == 3)
+	matrix[2][1] = gridCells[(int)cellInQuestion.x + 1][(int)cellInQuestion.y];
+    if (matrix[2][2] == 3)
+	matrix[2][2] = gridCells[(int)cellInQuestion.x + 1][(int)cellInQuestion.y +1];
 	int sum = 0;
 
         for (int i=0;i<3;i++) {
@@ -74,15 +136,14 @@ int countN(Vector2 cellNumber, Vector2 cellInQuestion,int gridCells[][(int)cellN
 	}
 	return sum;
 }
-void updateGrid(Vector2 cellNumber, int gridCells[][(int)cellNumber.y]) {
-	Vector2 cellInQuestion;
-	int gridCells2[(int)cellNumber.x][(int)cellNumber.y];
-	int current;
-	for (int i=0;i<cellNumber.x;i++) {
-		for (int j=0;j<cellNumber.y;j++) {
-                        cellInQuestion.x = i;
-                        cellInQuestion.y = j;
 
+void updateGrid(Vector2 cellNumber, int** gridCells, int** gridCells2) {
+	Vector2 cellInQuestion;
+	int current;
+	for (int i=0;i<cellNumber.x-1;i++) {
+		for (int j=0;j<cellNumber.y-1;j++) {
+            cellInQuestion.x = i;
+            cellInQuestion.y = j;
 			current = countN(cellNumber, cellInQuestion,gridCells);
                         if (gridCells[i][j] == 1) {
                         	if (current == 1 | current > 3) {
@@ -105,8 +166,8 @@ void updateGrid(Vector2 cellNumber, int gridCells[][(int)cellNumber.y]) {
 		}
 	}
 
-	for (int i=0;i<cellNumber.x;i++) {
-		for (int j=0;j<cellNumber.y;j++) {
+	for (int i=0;i<cellNumber.x-1;i++) {
+		for (int j=0;j<cellNumber.y-1;j++) {
 	    		gridCells[i][j] = gridCells2[i][j];
 		}
 	}
@@ -140,17 +201,14 @@ void Ones(Vector2 cellNumber, int gridCells[][(int)cellNumber.y]) {
 	gridCells[8][4] = 1;
 }
 
-void randomCells(int number,Vector2 cellNumber, int gridCells[][(int)cellNumber.y]) {
-
+void randomCells(int number,Vector2 cellNumber, int** gridCells) {
 	for (int i=0;i<number;i++) {
-		int randx = rand() % ((int)cellNumber.x + 1);
-		int randy = rand() % ((int)cellNumber.y + 1);
+		int randx = rand() % ((int)cellNumber.x );
+		int randy = rand() % ((int)cellNumber.y );
 		gridCells[randx][randy] = 1;
-
 	}
-
 }
-void printCell(Vector2 cellNumber, int gridCells[][(int)cellNumber.y]) {
+void printCell(Vector2 cellNumber, int** gridCells) {
 	printf("\n\n");
 	Vector2 cellInQuestion;
 	
@@ -167,32 +225,53 @@ void printCell(Vector2 cellNumber, int gridCells[][(int)cellNumber.y]) {
 		printf("\n");
 	}
 }
+
+struct quadrado {
+	Vector2 screenPos;
+	int status;
+};
+void quadraInit() {};
+
 int main() {
 	clock_t start,end;
 
-        Vector2 cellNumber = {500,500};  // Cell grid dimentions, e.g 50,100 would be a 50 by 100 cell grid
+    Vector2 cellNumber = {500,500};  // Cell grid dimentions, e.g 50,100 would be a 50 by 100 cell grid
 	int cellSize = 1;
 	int width = cellSize*(int)cellNumber.x;
 	int height = cellSize*(int)cellNumber.y;
 	char *title = "sdhfjhsdafjh";
-	Vector2 grid[(int)cellNumber.x][(int)cellNumber.y];  // 2d array holding the coordinates of every cell in the window
+
+	//Vector2 grid[(int)cellNumber.x][(int)cellNumber.y];  // 2d array holding the coordinates of every cell in the window
+
+    // Matrix instead of Vector2
+    Vector2** grid = func2V((int)cellNumber.x,(int)cellNumber.y);
 	gridInit(cellSize,cellNumber,grid);   //Initialize the poss grid
-	int gridCells[(int)cellNumber.x][(int)cellNumber.y];  //grid containing alive dead status for each cell
+                                        
+    printf("1 ok\n");
+	//int gridCells[(int)cellNumber.x][(int)cellNumber.y];  //grid containing alive dead status for each cell
+    int** gridCells = func2((int)cellNumber.x,(int)cellNumber.y);
+    int** gridCells2 = func2((int)cellNumber.x,(int)cellNumber.y);
 	gridCellsInit(cellNumber, gridCells); // Initialize with all dead cells
+                                          
+    
+    
+    printf("2 ok\n");
 	Vector2 pos = {0,0};
 	Vector2 size = {10,10};
 	//Ones(cellNumber, gridCells);
-        randomCells(14000,cellNumber,gridCells);
+    randomCells(14000,cellNumber,gridCells);
 
+
+    printf("3 ok\n");
 	InitWindow(width, height, title);
-        while (!WindowShouldClose()) {
+    while (!WindowShouldClose()) {
 	//for (int i=0;i<4;i++) {
 		start = clock();
 	       // printCell(cellNumber, gridCells);
 		BeginDrawing();
 		drawGrid(cellSize,cellNumber,gridCells,grid);
 		EndDrawing();
-		updateGrid(cellNumber,gridCells);
+		updateGrid(cellNumber,gridCells,gridCells2);
 		end = clock();
 		printf("time %f\n", 1000*((double) (end - start)/CLOCKS_PER_SEC));
 	}
