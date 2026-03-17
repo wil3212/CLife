@@ -172,7 +172,7 @@ void updateGrid(Vector2 cellNumber, int** gridCells, int** gridCells2) {
             if (gridCells[i][j] == 1) {
                 if (current < 2 || current > 3) { 
                     gridCells2[i][j] = 0;
-                    printf("cell[%d][%d]: cuurent: %d\n",(int)cellInQuestion.x,(int)cellInQuestion.y,current);
+                    //printf("cell[%d][%d]: cuurent: %d\n",(int)cellInQuestion.x,(int)cellInQuestion.y,current);
             }
             else 
                 gridCells2[i][j] = 1;
@@ -185,8 +185,8 @@ void updateGrid(Vector2 cellNumber, int** gridCells, int** gridCells2) {
 			}
 		}
     }
-	for (int i=0;i<cellNumber.x-1;i++) {
-		for (int j=0;j<cellNumber.y-1;j++) {
+	for (int i=0;i<cellNumber.x;i++) {
+		for (int j=0;j<cellNumber.y;j++) {
 	    		gridCells[i][j] = gridCells2[i][j];
 		}
 	}
@@ -261,8 +261,8 @@ void quadraInit() {};
 int main() {
 	clock_t start,end;
 
-    Vector2 cellNumber = {100,100};  // Cell grid dimentions, e.g 50,100 would be a 50 by 100 cell grid
-	int cellSize = 10;
+    Vector2 cellNumber = {500,500};  // Cell grid dimentions, e.g 50,100 would be a 50 by 100 cell grid
+	int cellSize = 1;
 	int width = cellSize*(int)cellNumber.x;
 	int height = cellSize*(int)cellNumber.y;
 	char *title = "sdhfjhsdafjh";
@@ -286,7 +286,7 @@ int main() {
 	//Vector2 size = {10,10};
 	Ones(cellNumber, gridCells);
 	//Test(cellNumber, gridCells);
-    //randomCells(1402,cellNumber,gridCells);
+    randomCells(14002,cellNumber,gridCells);
 
 
     printf("3 ok\n");
@@ -300,7 +300,7 @@ int main() {
 		EndDrawing();
 		updateGrid(cellNumber,gridCells,gridCells2);
 		end = clock();
-            //printf("time %f\n", 1000*((double) (end - start)/CLOCKS_PER_SEC));
+        printf("time %f\n", 1000*((double) (end - start)/CLOCKS_PER_SEC));
 	}
 return 1;
 }
