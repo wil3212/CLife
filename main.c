@@ -30,6 +30,7 @@ void freeMatrix(int** matrix,int rows) {
         free(matrix[i]);
     }
     free(matrix);
+    printf("matrix freed!\n");
 }                     
 
 
@@ -53,6 +54,14 @@ Vector2** func2V(int rows,int columns) {
     }
     return matrix;
 }
+// Free V matrix...
+void freeVMatrix(Vector2** matrix,int rows) {
+    for (int i=0;i<rows;i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
+    printf("matrix freed!\n");
+}                     
 // --------------------------------------------------------------------------------------
 void gridInit(int cellSize, Vector2 cellNumber, Vector2** gridToInitialize) {                    // Function will assing the right xreen coord for each cell
 	for (int i=0;i<cellNumber.x;i++) {
@@ -76,12 +85,17 @@ void drawGrid(int cellSize,Vector2 cellNumber, int** gridCells, Vector2** gridPo
 			if (gridCells[i][j] == 1) {
 				DrawRectangleV(gridPoss[i][j],cellSizeV, BLUE);
 			}
-
-		        else {
-				DrawRectangleV(gridPoss[i][j],cellSizeV, BLACK);
-			}
 		}
 	}
+}
+void drawGridUpdate(int cellSize,Vector2 cellNumber, int** gridCells, Vector2** gridPoss,Vector2* cellsToUpdate,int* countUpdates) {
+	Vector2 cellSizeV = {cellSize,cellSize};
+    if (*countUpdates > -1) {
+        for (int i=0;i<=*countUpdates;i++) {
+            if (gridCells[(int)cellsToUpdate[i].x][(int)cellsToUpdate[i].y] == 1) 
+                DrawRectangleV(gridPoss[(int)cellsToUpdate[i].x][(int)cellsToUpdate[i].y],cellSizeV, BLUE);
+        }
+    }
 }
 int countN(Vector2 cellNumber, Vector2 cellInQuestion,int** gridCells) {
 	int matrix[3][3];
@@ -161,9 +175,10 @@ int countN(Vector2 cellNumber, Vector2 cellInQuestion,int** gridCells) {
 	return sum;
 }
 
-void updateGrid(Vector2 cellNumber, int** gridCells, int** gridCells2) {
+void updateGrid(Vector2 cellNumber, int** gridCells, Vector2* cellsToUpdate,int* countUpdates) {
 	Vector2 cellInQuestion;
 	int current;
+    *countUpdates = -1; //set to -1, as 0 indicates that cellsToUpdate[0] needs to change.
 	for (int i=0;i<cellNumber.x;i++) {
 		for (int j=0;j<cellNumber.y;j++) {
             cellInQuestion.x = i;
@@ -171,25 +186,28 @@ void updateGrid(Vector2 cellNumber, int** gridCells, int** gridCells2) {
 			current = countN(cellNumber, cellInQuestion,gridCells);
             if (gridCells[i][j] == 1) {
                 if (current < 2 || current > 3) { 
-                    gridCells2[i][j] = 0;
+                    //gridCells2[i][j] = 0;
+                    (*countUpdates)++;
+                    cellsToUpdate[*countUpdates].x = i;
+                    cellsToUpdate[*countUpdates].y = j;
                     //printf("cell[%d][%d]: cuurent: %d\n",(int)cellInQuestion.x,(int)cellInQuestion.y,current);
+                }
             }
-            else 
-                gridCells2[i][j] = 1;
-            }
-			if (gridCells[i][j] == 0) {
-                if (current == 3) 
-                    gridCells2[i][j] = 1;
-				else 
-					gridCells2[i][j] = 0;
+            else {                             // that is, if (gridCells[i][j] == 0) {
+                if (current == 3) {
+                    //gridCells2[i][j] = 1;
+                    (*countUpdates)++;
+                    cellsToUpdate[*countUpdates].x = i;
+                    cellsToUpdate[*countUpdates].y = j;
+                }
 			}
 		}
     }
-	for (int i=0;i<cellNumber.x;i++) {
-		for (int j=0;j<cellNumber.y;j++) {
-	    		gridCells[i][j] = gridCells2[i][j];
-		}
-	}
+    if (*countUpdates > -1) {
+        for (int i=0;i<=*countUpdates;i++)           // now, instead of checking every cell, just check the changed ones, in cellsToUpdate, from 0 to countUpdates.
+            gridCells[(int)cellsToUpdate[i].x][(int)cellsToUpdate[i].y] = !gridCells[(int)cellsToUpdate[i].x][(int)cellsToUpdate[i].y];
+    }
+	
 }
 void Ones(Vector2 cellNumber, int** gridCells) {
 	/*
@@ -261,13 +279,21 @@ void quadraInit() {};
 int main() {
 	clock_t start,end;
 
-    Vector2 cellNumber = {500,500};  // Cell grid dimentions, e.g 50,100 would be a 50 by 100 cell grid
+    Vector2 cellNumber = {1000,1000};  // Cell grid dimentions, e.g 50,100 would be a 50 by 100 cell grid
 	int cellSize = 1;
 	int width = cellSize*(int)cellNumber.x;
 	int height = cellSize*(int)cellNumber.y;
 	char *title = "sdhfjhsdafjh";
 
-	//Vector2 grid[(int)cellNumber.x][(int)cellNumber.y];  // 2d array holding the coordinates of every cell in the window
+    // ---------------For updateGrid() & drawGrid()---------------
+    int countUpdates = 0; 
+    int* toCountUpdates = &countUpdates;
+    Vector2* toUpdate = func1V((int)cellNumber.x*(int)cellNumber.y);        // array that will hold coordinates of cells to update, has capacity to store (in the worst case) all cells in grid;
+                                                                            //
+    int countAlive = 0; 
+    int* toCountAlive = &countUpdates;
+    Vector2* toDraw = func1V((int)cellNumber.x*(int)cellNumber.y);        
+
 
     // Matrix instead of Vector2
     Vector2** grid = func2V((int)cellNumber.x,(int)cellNumber.y);
@@ -276,7 +302,7 @@ int main() {
     printf("1 ok\n");
 	//int gridCells[(int)cellNumber.x][(int)cellNumber.y];  //grid containing alive dead status for each cell
     int** gridCells = func2((int)cellNumber.x,(int)cellNumber.y);
-    int** gridCells2 = func2((int)cellNumber.x,(int)cellNumber.y);
+    //int** gridCells2 = func2((int)cellNumber.x,(int)cellNumber.y);
 	gridCellsInit(cellNumber, gridCells); // Initialize with all dead cells
                                           
     
@@ -286,7 +312,7 @@ int main() {
 	//Vector2 size = {10,10};
 	Ones(cellNumber, gridCells);
 	//Test(cellNumber, gridCells);
-    randomCells(14002,cellNumber,gridCells);
+    randomCells(14032,cellNumber,gridCells);
 
 
     printf("3 ok\n");
@@ -296,11 +322,19 @@ int main() {
 		start = clock();
 	       // printCell(cellNumber, gridCells);
 		BeginDrawing();
-		drawGrid(cellSize,cellNumber,gridCells,grid);
+        ClearBackground(BLACK);
+		//drawGridUpdate(cellSize,cellNumber,gridCells,grid,toUpdate,toCountUpdates);
+	    drawGrid(cellSize,cellNumber,gridCells,grid);  //draw all squares
 		EndDrawing();
-		updateGrid(cellNumber,gridCells,gridCells2);
+		updateGrid(cellNumber,gridCells,toUpdate,toCountUpdates);
 		end = clock();
-        printf("time %f\n", 1000*((double) (end - start)/CLOCKS_PER_SEC));
+        //printf("time %f\n", 1000*((double) (end - start)/CLOCKS_PER_SEC));
+        printf("FPS %.0f\n", 1000 / (1000*((double) (end - start)/CLOCKS_PER_SEC)));
 	}
+    printf("program ended\n");
+    free(toUpdate);
+    freeMatrix(gridCells,(int)cellNumber.x);
+    //freeMatrix(gridCells2,(int)cellNumber.x);
+    freeVMatrix(grid,(int)cellNumber.x);
 return 1;
 }
