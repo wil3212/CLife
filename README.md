@@ -14,6 +14,17 @@ Implementing Conway's Game of Life in C, with raylib
 
 
 
+## currently working on implementation of 2D camera mode (allowing for zoom and navigation of the grid, as well as clicking to toggling cells)
+
+
+
+## Minor changes made:
+    * Inclusion of global variables A, B and C for cell logic 
+      - Future project: Make a much more flexible way of implementing the game logic:
+            -> allowing for easy rules change, beyond simple current intervals;
+            -> considering neighbours beyond the current 3x3 area
+            -> cell states different from 0 and 1 (different cell species);
+
 
 ## Optimization status:
 Approach 2. was choosen, doubling performance (more); Now 500x500 grid runs at 60fps.

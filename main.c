@@ -3,6 +3,16 @@
 #include <raylib.h>
 #include <unistd.h>
 #include <time.h>
+#include <math.h>
+
+
+
+// Living Cells with neighbour numbers between A and B (including) survives 
+// Dead Cells with exactly C living neighbours gets born
+#define A 2
+#define B 3
+#define C 3
+
 
 
 // Matrix of int
@@ -185,7 +195,7 @@ void updateGrid(Vector2 cellNumber, int** gridCells, Vector2* cellsToUpdate,int*
             cellInQuestion.y = j;
 			current = countN(cellNumber, cellInQuestion,gridCells);
             if (gridCells[i][j] == 1) {
-                if (current < 2 || current > 3) { 
+                if (current < A || current > B) { 
                     //gridCells2[i][j] = 0;
                     (*countUpdates)++;
                     cellsToUpdate[*countUpdates].x = i;
@@ -194,7 +204,7 @@ void updateGrid(Vector2 cellNumber, int** gridCells, Vector2* cellsToUpdate,int*
                 }
             }
             else {                             // that is, if (gridCells[i][j] == 0) {
-                if (current == 3) {
+                if (current == C) {
                     //gridCells2[i][j] = 1;
                     (*countUpdates)++;
                     cellsToUpdate[*countUpdates].x = i;
@@ -304,27 +314,54 @@ int main() {
     int** gridCells = func2((int)cellNumber.x,(int)cellNumber.y);
     //int** gridCells2 = func2((int)cellNumber.x,(int)cellNumber.y);
 	gridCellsInit(cellNumber, gridCells); // Initialize with all dead cells
-                                          
+
+
+    gridCells[(int)cellNumber.x/2][(int)cellNumber.y/2] = 1;
     
     
     printf("2 ok\n");
 	Vector2 pos = {0,0};
 	//Vector2 size = {10,10};
-	Ones(cellNumber, gridCells);
+	//Ones(cellNumber, gridCells);
 	//Test(cellNumber, gridCells);
-    randomCells(14032,cellNumber,gridCells);
+    randomCells(143032,cellNumber,gridCells);
 
 
     printf("3 ok\n");
 	InitWindow(width, height, title);
+
+
+    Vector2 playerPoss;
+    playerPoss.x = (cellSize*cellNumber.x)/2.0f;
+    playerPoss.y = (cellSize*cellNumber.y)/2.0f;
+    Camera2D camera = { 0 };
+
+    camera.target = playerPoss;
+
+    camera.offset = (Vector2){ (cellSize*cellNumber.x)/2.0f, (cellSize*cellNumber.y)/2.0f };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+    
     while (!WindowShouldClose()) {
-	//for (int i=0;i<4;i++) {
 		start = clock();
-	       // printCell(cellNumber, gridCells);
+
+        if (IsKeyDown(KEY_RIGHT)) playerPoss.x += 2;
+        else if (IsKeyDown(KEY_LEFT)) playerPoss.x -= 2;
+        if (IsKeyDown(KEY_UP)) playerPoss.y -= 2;
+        else if (IsKeyDown(KEY_DOWN)) playerPoss.y += 2;
+
+        // Camera target follows player
+        camera.target = (Vector2){ playerPoss.x + 20, playerPoss.y + 20 };        
+
+
+        camera.zoom = expf(logf(camera.zoom) + ((float)GetMouseWheelMove()*0.2f));
+        if (camera.zoom > 15.0f) camera.zoom = 15.0f;
+        else if (camera.zoom < 0.8f) camera.zoom = 0.8f;
 		BeginDrawing();
-        ClearBackground(BLACK);
-		//drawGridUpdate(cellSize,cellNumber,gridCells,grid,toUpdate,toCountUpdates);
-	    drawGrid(cellSize,cellNumber,gridCells,grid);  //draw all squares
+            ClearBackground(BLACK);
+            BeginMode2D(camera);
+                drawGrid(cellSize,cellNumber,gridCells,grid);  //draw all squares
+            EndMode2D();
 		EndDrawing();
 		updateGrid(cellNumber,gridCells,toUpdate,toCountUpdates);
 		end = clock();
